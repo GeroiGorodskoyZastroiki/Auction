@@ -2,34 +2,35 @@ using System.Collections.Generic;
 
 public class Agent
 {
-    float _oneCurrency;
-    float _anotherCurrency;
-    float _minRate;
-    float _maxRate;
-    bool _fromOneToAnother;
+    List<CurrencyAmount> _account = new List<CurrencyAmount>();
+    public List<Exchange> _exchanges {get; private set;}
 
-    public Agent(float oneCurrency, float anotherCurrency, float minRate, float maxRate, bool fromOneToAnother)
+    public Agent(List<CurrencyAmount> account)
     {
-        _oneCurrency = oneCurrency;
-        _anotherCurrency = anotherCurrency;
-        _minRate = minRate;
-        _maxRate = maxRate;
-        _fromOneToAnother = fromOneToAnother;
+        _account = account;
+        _exchanges = new List<Exchange>();
     }
 
-    public Agent Exchange()
+    void AddCurrency(CurrencyAmount currencyAmount)
     {
-        Agent partner = FindBestOption();
+        CurrencyAmount? existingCurrency = _account.Find(x => x.Currency == currencyAmount.Currency);
+        if (existingCurrency != null) existingCurrency.Amount += currencyAmount.Amount;
+        else _account.Add(currencyAmount);
+    }
+
+    public Agent Exchange(List<Agent> agents)
+    {
+        Agent partner = FindBestOption(agents);
         return partner;
     }
 
     Agent FindBestOption(List<Agent> agents)
     {
-        Agent bestOption;
+        Agent bestOption = agents[0];
         foreach (var agent in agents)
         {
+            if (this == agent) continue;
             if (agent._fromOneToAnother == this._fromOneToAnother) continue;
-
         }
         return bestOption;
     }

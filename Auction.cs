@@ -8,29 +8,28 @@ public class Auction
     List<Agent> _agents = new List<Agent>();
     Random rnd = new Random();
 
-    public Game(int iterations, int agentsCount)
+    public Auction(int iterations, int agentsCount)
     {
         _iterations = iterations;
         _agentsCount = agentsCount;
         for (int i = 0; i < _agentsCount; i++)
         {
-            bool rndFromOneToAnother = Math.Round(rnd.Next(0,1));
-            float rndOneCurrency = rnd.Next();
-            float rndAnotherCurrency = rnd.Next();
-            float rndMinRate = rnd.Next();
-            float rndMaxRate = rnd.Next();
-            _agents.Add(new Agent(rndOneCurrency, rndAnotherCurrency, rndMinRate, rndMaxRate, rndFromOneToAnother));
+            List<CurrencyAmount> account = new List<CurrencyAmount>();
+            _agents.Add(new Agent(account));
         }
     }
 
     public void StartExchange() //
     {
-        var loopsCount = _agentsCount;
-        for (int i = 0; i < loopsCount; i++) //скорее всего не работает
+        for (int i = 0; i < _iterations; i++)
         {
-            _agents.Remove(_agents[i].Exchange());
-            _agents.Remove(_agents[i]);
-            loopsCount--;
+            var loopsCount = _agentsCount;
+            for (int j = 0; j < loopsCount; j++) 
+            {
+                _agents.Remove(_agents[j].Exchange(_agents));
+                _agents.Remove(_agents[j]);
+                loopsCount--;
+            }
         }
     }
 }
