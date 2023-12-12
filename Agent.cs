@@ -5,10 +5,10 @@ public class Agent
     public List<CurrencyAmount> Account {get; private set;}
     public List<Exchange> Exchanges {get; private set;}
 
-    public Agent(List<CurrencyAmount> account)
+    public Agent()
     {
-        Account = account;
-        Exchanges = new List<Exchange>();
+        Account = new();
+        Exchanges = new();
     }
 
     void AddCurrency(CurrencyAmount currencyAmount)
@@ -29,11 +29,11 @@ public class Agent
         Agent partner = FindBestOption(agents);
         var agentAccount = this.Account.Single(x => x.Currency == this.Exchanges[0].From);
         var partnerAccount = partner.Account.Single(x => x.Currency == this.Exchanges[0].To);
-        if (partnerAccount.Amount * this.Exchanges[0].Rate < agentAccount.Amount)
-        this.WithdrawCurrency();
-        this.AddCurrency();
-        partner.WithdrawCurrency();
-        partner.AddCurrency();
+        //if (partnerAccount.Amount * this.Exchanges[0].Rate < agentAccount.Amount)
+        // this.WithdrawCurrency();
+        // this.AddCurrency();
+        // partner.WithdrawCurrency();
+        // partner.AddCurrency();
         return partner;
     }
 

@@ -29,3 +29,15 @@ public class Exchange
         Rate = rate;
     }
 }
+
+public static class ExchangeRates
+{
+    public static Dictionary<Currency, float> сoefficients = new Dictionary<Currency, float>();
+    static ExchangeRates()
+    {
+        var rnd = new Random();
+        var currencyList = Enum.GetValues(typeof(Currency)).Cast<Currency>().ToList();
+        for (int i = 0; i < currencyList.Count; i++)
+            сoefficients.Add(currencyList[i], rnd.Next(1, 10));
+    }
+}

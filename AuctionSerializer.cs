@@ -16,7 +16,7 @@ public class AuctionSerializer
             writer.WriteLine($"Iteration {iteration}");
             for (int i = 0; i < _auction.Agents.Count; i++)
             {
-                writer.WriteLine($"Agent {i+1}:");
+                writer.WriteLine($"Agent {i}:");
                 foreach (var account in _auction.Agents[i].Account)
                 {
                     writer.WriteLine($"   {account.Currency.ToString()}: {account.Amount}");

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public class Auction
 {
@@ -13,43 +14,60 @@ public class Auction
     {
         _iterations = iterations;
         _agentsCount = agentsCount;
-        _auctionSerializer = new AuctionSerializer(this);
-        Agents = new List<Agent>();
+        _auctionSerializer = new(this);
+        Agents = new();
         for (int i = 0; i < _agentsCount; i++)
         {
-            Agents.Add(new Agent(CreateAccountExample()));
-            Agents[i].Exchanges.Add(CreateExchangeExample());
+            Agents.Add(new Agent());
+            Agents[i].Exchanges.Add(CreateExampleExchange());
+            Agents[i].Account.AddRange(CreateExampleAccount(new List<Currency>() { Agents[i].Exchanges[0].From, Agents[i].Exchanges[0].To }));
         }
+
+        StartExchange();
     }
 
-    List<CurrencyAmount> CreateAccountExample()
+    List<CurrencyAmount> CreateExampleAccount(List<Currency> currencies)
     {
-            List<CurrencyAmount> account = new List<CurrencyAmount>();
-            account.Add(new CurrencyAmount(Currency.Rubles, rnd.Next(100, 1001)));
-            account.Add(new CurrencyAmount(Currency.Virts, rnd.Next(100, 1001)));
-            return account;
+        List<CurrencyAmount> account = new List<CurrencyAmount>();
+        account.Add(new CurrencyAmount(currencies[0], rnd.Next(100, 1001)));
+        account.Add(new CurrencyAmount(currencies[1], rnd.Next(100, 1001)));
+        return account;
     }
 
-    Exchange CreateExchangeExample()
+    Exchange CreateExampleExchange()
     {
-        Currency from = rnd.Next(0,2) == 0? Currency.Rubles: Currency.Virts;
-        Currency to = from == Currency.Rubles? Currency.Virts: Currency.Virts;
-        return new Exchange(from, to, rnd.Next(5, 15)/10);
+        var currencyList = Enum.GetValues(typeof(Currency)).Cast<Currency>().ToList();
+        Currency from = currencyList[rnd.Next(0, currencyList.Count)];
+        currencyList.Remove(from);
+        Currency to = currencyList[rnd.Next(0, currencyList.Count())];
+        float rate = ExchangeRates.сoefficients[from]/ExchangeRates.сoefficients[to];
+        rate += (float)(rnd.Next(-10,10))/10;
+        return new Exchange(from, to, rate);
     }
 
-    public void StartExchange() //
+    public void StartExchange()
     {
         _auctionSerializer.LogIteration(0);
         for (int i = 0; i < _iterations; i++)
         {
-            var AgentsCopy = Agents;
-            var loopsCount = _agentsCount;
-            for (int j = 0; j < loopsCount; j++) 
+            List<Agent[]> pairs = new List<Agent[]>();
+            while (Agents.Count != 0)
             {
-                AgentsCopy.Remove(AgentsCopy[j].Exchange(Agents));
-                AgentsCopy.Remove(AgentsCopy[j]);
-                loopsCount--;
+                Agent[] pair = new Agent[2];
+                Agent agent = Agents[0];
+                Agents.Remove(agent);
+                //Agents.Select(x => x.Exchanges[0].Rate > 1? agent.Exchanges[0].Rate > x.Exchanges[0].Rate : )
+                pairs.Add(pair);
             }
+
+            // var AgentsCopy = Agents;
+            // var loopsCount = _agentsCount;
+            // for (int j = 0; j < loopsCount; j++) 
+            // {
+            //     AgentsCopy.Remove(AgentsCopy[j].Exchange(Agents));
+            //     AgentsCopy.Remove(AgentsCopy[j]);
+            //     loopsCount--;
+            // }
             _auctionSerializer.LogIteration(i);
         }
     }
