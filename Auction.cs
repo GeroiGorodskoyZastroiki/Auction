@@ -23,7 +23,7 @@ public class Auction
             Agents[i].Account.AddRange(CreateExampleAccount(new List<Currency>() { Agents[i].Exchanges[0].From, Agents[i].Exchanges[0].To }));
         }
 
-        StartExchange();
+        StartExampleExchange();
     }
 
     List<CurrencyAmount> CreateExampleAccount(List<Currency> currencies)
@@ -41,11 +41,12 @@ public class Auction
         currencyList.Remove(from);
         Currency to = currencyList[rnd.Next(0, currencyList.Count())];
         float rate = ExchangeRates.сoefficients[from]/ExchangeRates.сoefficients[to];
-        rate += (float)(rnd.Next(-10,10))/10;
+        rate += (float)(rnd.Next(1,5))/10;
+        rate = Math.Abs(rate);
         return new Exchange(from, to, rate);
     }
 
-    public void StartExchange()
+    public void StartExampleExchange()
     {
         _auctionSerializer.LogIteration(0);
         for (int i = 0; i < _iterations; i++)
@@ -56,7 +57,7 @@ public class Auction
                 Agent[] pair = new Agent[2];
                 Agent agent = Agents[0];
                 Agents.Remove(agent);
-                //Agents.Select(x => x.Exchanges[0].Rate > 1? agent.Exchanges[0].Rate > x.Exchanges[0].Rate : )
+                List<Agent> potentialAgents = Agents.Where(x => x.Exchanges[0].Rate > 1 == agent.Exchanges[0].Rate > 1).Order().ToList(); //выгоднее когда меньше ставка
                 pairs.Add(pair);
             }
 
