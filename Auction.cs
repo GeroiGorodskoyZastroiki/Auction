@@ -4,6 +4,7 @@ using System.Linq;
 
 public class Auction
 {
+    public static Auction Instance {get; private set;}
     int _iterations;
     int _agentsCount;
     AuctionSerializer _auctionSerializer;
@@ -12,6 +13,8 @@ public class Auction
 
     public Auction(int iterations, int agentsCount)
     {
+        Instance = this;
+
         _iterations = iterations;
         _agentsCount = agentsCount;
         _auctionSerializer = new(this);
@@ -21,7 +24,6 @@ public class Auction
             Agents.Add(new Agent(i));
             Agents[i].Exchanges.Add(CreateExampleExchange());
             Agents[i].Account.AddRange(CreateExampleAccount(new List<Currency>() { Agents[i].Exchanges[0].From, Agents[i].Exchanges[0].To }));
-            Agents = Agents.OrderBy(x => x.Exchanges[0].Rate).ToList();
         }
 
         StartExampleExchange();
@@ -29,13 +31,13 @@ public class Auction
 
     List<CurrencyAmount> CreateExampleAccount(List<Currency> currencies)
     {
-        List<CurrencyAmount> account = new List<CurrencyAmount>();
-        account.Add(new CurrencyAmount(currencies[0], rnd.Next(100, 1001)));
-        account.Add(new CurrencyAmount(currencies[1], rnd.Next(100, 1001)));
+        List<CurrencyAmount> account = new List<CurrencyAmount>() {
+        new CurrencyAmount(currencies[0], rnd.Next(100, 1001)),
+        new CurrencyAmount(currencies[1], rnd.Next(100, 1001)) };
         return account;
     }
 
-    Exchange CreateExampleExchange()
+    Exchange CreateExampleExchange() 
     {
         var currencyList = Enum.GetValues(typeof(Currency)).Cast<Currency>().ToList();
         Currency from = currencyList[rnd.Next(0, currencyList.Count)];
@@ -51,39 +53,23 @@ public class Auction
         _auctionSerializer.LogIteration(0);
         for (int i = 1; i < _iterations + 1; i++)
         {
-            List<Agent[]> pairs = new List<Agent[]>();
-            for (int j = 0; j < _agentsCount/2; j++)
-            {
-                Agent[] pair = new Agent[2];
-                Agents = Agents.Where(x => x.Account.Single(y => y.Currency == x.Exchanges[0].From).Amount > 0)
-                                .OrderBy(x => x.Exchanges[0].Rate).ToList();
-                pair[0] = Agents[0];
-                List<Agent> potentialAgents = Agents.Where(x => x.Account.Single(y => y.Currency == x.Exchanges[0].From).Amount > 0)
-                                                    .Where(x => x.Exchanges[0].To == pair[0].Exchanges[0].From)
-                                                    .Where(x => 1/x.Exchanges[0].Rate <= pair[0].Exchanges[0].Rate)
-                                                    .OrderBy(x => x.Exchanges[0].Rate).ToList();
-                if (potentialAgents.Count == 0) break;
-                pair[1] = potentialAgents[0];
-                Agents.Remove(pair[0]);
-                Agents.Remove(potentialAgents[0]);
-                pairs.Add(pair);
-            }
+            List<Agent> newAgents = new List<Agent>(); //буффер для агентов, которые уже осуществили итерацию
+            Agents.Where(x => x.Account.Single(y => y.Currency == x.Exchanges[0].From).Amount == 0).ToList()
+                    .ForEach(x => {newAgents.Add(x); Agents.Remove(x);}); //сразу перемещаем туда агентов без средств для обмена
 
-            foreach (var pair in pairs)
+            while (Agents.Count != 0)
             {
-                var possibleAmount = pair[0].Account.Single(x => x.Currency == pair[0].Exchanges[0].From).Amount * pair[0].Exchanges[0].Rate;
-                if (possibleAmount > pair[1].Account.Single(x => x.Currency == pair[0].Exchanges[0].To).Amount)
-                    possibleAmount = pair[1].Account.Single(x => x.Currency == pair[0].Exchanges[0].To).Amount;
-                pair[0].AddCurrency(new CurrencyAmount(pair[0].Exchanges[0].To, possibleAmount));
-                pair[0].WithdrawCurrency(new CurrencyAmount(pair[0].Exchanges[0].From, possibleAmount/pair[0].Exchanges[0].Rate));
-                pair[1].AddCurrency(new CurrencyAmount(pair[0].Exchanges[0].From, possibleAmount/pair[0].Exchanges[0].Rate));
-                pair[1].WithdrawCurrency(new CurrencyAmount(pair[0].Exchanges[0].To, possibleAmount));
-                Agents.Add(pair[0]);
-                Agents.Add(pair[1]);
+                Agents = Agents.OrderBy(x => x.Exchanges[0].Rate).ToList();
+                var agent = Agents[0];
+                newAgents.Add(agent);
+                Agents.Remove(agent);
+                var pairAgent = agent.Exchange(); //командуем автономным агентам начать обмен
+                if (pairAgent == null) continue;
+                newAgents.Add(pairAgent);
+                Agents.Remove(pairAgent);
             }
-
+            Agents = newAgents;
             _auctionSerializer.LogIteration(i);
-            Agents = Agents.OrderBy(x => x.Exchanges[0].Rate).ToList();
         }
     }
 }

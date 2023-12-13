@@ -9,7 +9,7 @@ public class AuctionSerializer
         _auction = auction;
     }
 
-    public void LogIteration(int iteration)
+    public void LogIteration(int iteration) //логируем итераицю и счета агентов
     {
         var sortedAgents = _auction.Agents.OrderBy(x => x.ID).ToList();
         using (StreamWriter writer = new StreamWriter($"Logs/{iteration}.txt"))
@@ -19,9 +19,7 @@ public class AuctionSerializer
             {
                 writer.WriteLine($"Agent {sortedAgents[i].ID}:");
                 foreach (var account in sortedAgents[i].Account)
-                {
                     writer.WriteLine($"   {account.Currency}: {account.Amount}");
-                }
                 writer.WriteLine("\n");
             }
         }
