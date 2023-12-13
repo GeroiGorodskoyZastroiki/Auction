@@ -19,7 +19,7 @@ public class Auction
         _agentsCount = agentsCount;
         _auctionSerializer = new(this);
         Agents = new();
-        for (int i = 0; i < _agentsCount; i++)
+        for (int i = 0; i < _agentsCount; i++) //создание популяции агентов
         {
             Agents.Add(new Agent(i));
             Agents[i].Exchanges.Add(CreateExampleExchange());
@@ -29,7 +29,7 @@ public class Auction
         StartExampleExchange();
     }
 
-    List<CurrencyAmount> CreateExampleAccount(List<Currency> currencies)
+    List<CurrencyAmount> CreateExampleAccount(List<Currency> currencies) //создание счетов агента
     {
         List<CurrencyAmount> account = new List<CurrencyAmount>() {
         new CurrencyAmount(currencies[0], rnd.Next(100, 1001)),
@@ -37,13 +37,13 @@ public class Auction
         return account;
     }
 
-    Exchange CreateExampleExchange() 
+    Exchange CreateExampleExchange() //создание предложения обмена агента
     {
         var currencyList = Enum.GetValues(typeof(Currency)).Cast<Currency>().ToList();
         Currency from = currencyList[rnd.Next(0, currencyList.Count)];
         currencyList.Remove(from);
         Currency to = currencyList[rnd.Next(0, currencyList.Count())];
-        float rate = ExchangeRates.сoefficients[from]/ExchangeRates.сoefficients[to];
+        float rate = ExchangeRates.coefficients[from]/ExchangeRates.coefficients[to];
         rate += rate > 1 ? (float)rnd.Next(10,50)/100 : (float)rnd.Next(10,50)/1000;
         return new Exchange(from, to, rate);
     }

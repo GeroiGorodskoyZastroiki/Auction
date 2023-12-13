@@ -32,13 +32,13 @@ public class Exchange
 
 public static class ExchangeRates
 {
-    public static Dictionary<Currency, float> сoefficients = new Dictionary<Currency, float>();
+    public static Dictionary<Currency, float> coefficients = new Dictionary<Currency, float>();
     static ExchangeRates()
     {
         var rnd = new Random();
         var currencyList = Enum.GetValues(typeof(Currency)).Cast<Currency>().ToList();
         //генерируем коэффициенты при делении которых будет образовываться ставка по курсу
         for (int i = 0; i < currencyList.Count; i++)
-            сoefficients.Add(currencyList[i], rnd.Next(1, 10));
+            coefficients.Add(currencyList[i], rnd.Next(1, 10));
     }
 }
